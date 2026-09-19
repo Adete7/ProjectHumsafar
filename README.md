@@ -284,8 +284,8 @@ Try testing these pre-configured scenarios in the application:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/Adete7/PromptWarProject.git
-cd PromptWarProject
+git clone https://github.com/Adete7/ProjectHumsafar.git
+cd ProjectHumsafar
 
 # 2. Run from workspace root (proxies into humsafar)
 npm run dev
@@ -304,4 +304,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 👥 Contributors & Acknowledgments
 Built with ❤️ for Indian seniors and families as part of the **Prompt War Project**.
-* **Repository:** [https://github.com/Adete7/PromptWarProject](https://github.com/Adete7/PromptWarProject)
+* **Repository:** [https://github.com/Adete7/ProjectHumsafar](https://github.com/Adete7/ProjectHumsafar)
