@@ -2,13 +2,17 @@
 ### Senior Citizen Care Companion & AI Scam Shield
 **Prompt War Project** | *A culturally tuned, elder-first assistive platform empowering Indian seniors and safeguarding them against digital threats.*
 
-[![Next.js](https://img.shields.io/badge/Next.js-14.2.4-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel)](https://humsafar-cyan.vercel.app)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2.35-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Leaflet OSM](https://img.shields.io/badge/OpenStreetMap-Leaflet-199900?style=for-the-badge&logo=leaflet)](https://leafletjs.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-1.5_Flash-orange?style=for-the-badge&logo=google)](https://ai.google.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-10.12-FFA611?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 [![Vitest](https://img.shields.io/badge/Tested_with-Vitest-yellow?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+
+> 🌐 **Live Production Deployment**: **[https://humsafar-cyan.vercel.app](https://humsafar-cyan.vercel.app)**
+> 🔗 **GitHub Repository**: **[https://github.com/Adete7/ProjectHumsafar](https://github.com/Adete7/ProjectHumsafar)**
 
 ---
 
