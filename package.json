@@ -1,0 +1,32 @@
+{
+  "name": "humsafar",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix humsafar run dev",
+    "build": "npm --prefix humsafar run build",
+    "start": "npm --prefix humsafar run start",
+    "lint": "npm --prefix humsafar run lint",
+    "test": "npm --prefix humsafar run test"
+  },
+  "dependencies": {
+    "@google/genai": "^0.1.1",
+    "firebase": "^10.14.1",
+    "lucide-react": "^0.453.0",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
