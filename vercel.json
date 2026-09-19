@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npm --prefix humsafar run build",
+  "outputDirectory": "humsafar/.next",
+  "installCommand": "npm --prefix humsafar install"
+}
