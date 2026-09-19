@@ -16,6 +16,16 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
   return R * c;
 }
 
+export function calculateHaversineDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const meters = calculateDistance(lat1, lon1, lat2, lon2);
+  return Math.round((meters / 1000) * 100) / 100;
+}
+
 export function isWithinSafeZone(
   currentLat: number, 
   currentLng: number, 

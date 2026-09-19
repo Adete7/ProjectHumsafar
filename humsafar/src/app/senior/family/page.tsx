@@ -1,24 +1,33 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import ElderHeader from '@/components/common/ElderHeader';
+import EmergencySOS from '@/components/common/EmergencySOS';
+import ElderDecorativeBackground from '@/components/common/ElderDecorativeBackground';
 import FamilyDialerGrid from '@/components/senior/FamilyDialerGrid';
-import { LanguageCode, FamilyMember } from '@/types';
-
-const FAMILY_MEMBERS: FamilyMember[] = [
-  { id: 'f1', name: 'Ramesh (Son)', relation: 'Son', photoUrl: 'https://api.dicebear.com/8.x/avataaars/svg?seed=Ramesh', status: 'Available', phone: '123' },
-  { id: 'f2', name: 'Priya (Daughter)', relation: 'Daughter', photoUrl: 'https://api.dicebear.com/8.x/avataaars/svg?seed=Priya', status: 'Busy', phone: '124' },
-  { id: 'f3', name: 'Rahul (Grandson)', relation: 'Grandson', photoUrl: 'https://api.dicebear.com/8.x/avataaars/svg?seed=Rahul', status: 'Available', phone: '125' },
-];
+import { LanguageCode } from '@/types';
+import { getStoredFamilyMembers, StoredFamilyMember } from '@/lib/storageEvents';
 
 export default function FamilyPage() {
   const [lang, setLang] = useState<LanguageCode>('hi-IN');
   const [audio, setAudio] = useState(true);
+  const [members, setMembers] = useState<StoredFamilyMember[]>([]);
+
+  useEffect(() => {
+    setMembers(getStoredFamilyMembers());
+    const listener = (e: any) => {
+      if (e.detail) setMembers(e.detail);
+    };
+    window.addEventListener('humsafar_family_change', listener);
+    return () => window.removeEventListener('humsafar_family_change', listener);
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <ElderDecorativeBackground />
+
       <ElderHeader 
         title="CALL FAMILY (परिवार)" 
         langCode={lang} 
@@ -27,15 +36,30 @@ export default function FamilyPage() {
         onToggleAudio={() => setAudio(!audio)}
       />
       
-      <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
-        <div className="mb-6">
-          <Link href="/senior" className="inline-flex items-center gap-4 bg-white p-4 rounded-2xl border-4 border-senior-blue text-elder-xl font-bold shadow">
-            <ArrowLeft size={36} /> BACK
+      <main className="relative z-10 flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full mb-20">
+        <div className="flex items-center justify-between mb-6">
+          <Link 
+            href="/senior" 
+            className="inline-flex items-center gap-3 glass-surface p-4 rounded-2xl border-3 border-amber-400 text-elder-xl font-black text-slate-900 shadow hover:bg-amber-100 active:scale-95 transition-all"
+          >
+            <ArrowLeft size={34} className="text-orange-600" />
+            <span>वापस (BACK)</span>
           </Link>
+
+          <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-2xl glass-surface-warm border border-amber-300 text-amber-900 font-extrabold text-elder-base">
+            <Users size={22} className="text-orange-600" />
+            <span>1-टच स्पीड डायलर</span>
+          </div>
         </div>
 
-        <FamilyDialerGrid members={FAMILY_MEMBERS} />
+        <FamilyDialerGrid 
+          members={members} 
+          onMembersChange={setMembers} 
+          langCode={lang} 
+        />
       </main>
+
+      <EmergencySOS langCode={lang} />
     </div>
   );
 }
