@@ -1,13 +1,41 @@
 import { GoogleGenAI } from '@google/genai';
+import { ScamAnalysisResult } from '@/types';
 
-export function analyzeScamWithHeuristics(text: string, langCode: string = 'hi-IN') {
+// In-Memory LRU / TTL Response Cache for Scam Evaluations
+interface CacheEntry {
+  result: ScamAnalysisResult;
+  timestamp: number;
+}
+
+const scamCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours TTL
+const MAX_CACHE_ENTRIES = 1000;
+
+function normalizeCacheKey(text: string, langCode: string): string {
+  const cleanText = text.toLowerCase().trim().replace(/\s+/g, ' ');
+  return `${langCode.toLowerCase()}:${cleanText}`;
+}
+
+export function clearScamCache(): void {
+  scamCache.clear();
+}
+
+export function getScamCacheStats(): { size: number; maxEntries: number; ttlHours: number } {
+  return {
+    size: scamCache.size,
+    maxEntries: MAX_CACHE_ENTRIES,
+    ttlHours: 24,
+  };
+}
+
+export function analyzeScamWithHeuristics(text: string, langCode: string = 'hi-IN'): ScamAnalysisResult {
   const lower = text.toLowerCase();
   const triggers: string[] = [];
 
   // Critical fraud patterns commonly targeting Indian seniors
   if (
-    lower.includes("electricity") &&
-    (lower.includes("disconnect") || lower.includes("tonight") || lower.includes("bill unpaid") || lower.includes("power"))
+    (lower.includes("electricity") || lower.includes("power") || lower.includes("bijli")) &&
+    (lower.includes("disconnect") || lower.includes("tonight") || lower.includes("bill unpaid") || lower.includes("cut"))
   ) {
     triggers.push("Urgent electricity disconnection extortion threat");
   }
@@ -71,10 +99,11 @@ export function analyzeScamWithHeuristics(text: string, langCode: string = 'hi-I
 
     return {
       isScam: true,
-      riskLevel: "CRITICAL" as const,
+      riskLevel: "CRITICAL",
       elderExplanation: elderWarning,
       guardianSummary: `Flagged fraudulent message with vectors: ${triggers.join(", ")}. Immediate block recommended.`,
-      suggestedAction: "BLOCK_AND_REPORT" as const,
+      suggestedAction: "BLOCK_AND_REPORT",
+      detectedTriggers: triggers,
     };
   }
 
@@ -86,10 +115,11 @@ export function analyzeScamWithHeuristics(text: string, langCode: string = 'hi-I
 
     return {
       isScam: true,
-      riskLevel: "MODERATE" as const,
+      riskLevel: "MODERATE",
       elderExplanation: elderWarning,
       guardianSummary: "Message contains urgency keywords or unverified cashback promises.",
-      suggestedAction: "BLOCK_AND_REPORT" as const,
+      suggestedAction: "MANUAL_REVIEW",
+      detectedTriggers: ["Urgency pressure", "Unverified claims"],
     };
   }
 
@@ -100,18 +130,36 @@ export function analyzeScamWithHeuristics(text: string, langCode: string = 'hi-I
 
   return {
     isScam: false,
-    riskLevel: "SAFE" as const,
+    riskLevel: "SAFE",
     elderExplanation: elderSafe,
     guardianSummary: "No malicious patterns or phishing triggers detected.",
-    suggestedAction: "SAFE_TO_OPEN" as const,
+    suggestedAction: "SAFE_TO_OPEN",
+    detectedTriggers: [],
   };
 }
 
-export async function analyzeScam(content: string, langCode: string = 'hi-IN') {
-  const apiKey = process.env.GEMINI_API_KEY;
+export async function analyzeScam(content: string, langCode: string = 'hi-IN'): Promise<ScamAnalysisResult> {
+  const cacheKey = normalizeCacheKey(content, langCode);
+  const now = Date.now();
 
+  // 1. Check In-Memory Cache (24-hour evaluation window)
+  const cached = scamCache.get(cacheKey);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    // Re-insert to refresh LRU order
+    scamCache.delete(cacheKey);
+    scamCache.set(cacheKey, cached);
+    return {
+      ...cached.result,
+      fromCache: true,
+    };
+  }
+
+  // 2. Defensive check for API key
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "your_gemini_api_key_here") {
-    return analyzeScamWithHeuristics(content, langCode);
+    const fallbackResult = analyzeScamWithHeuristics(content, langCode);
+    scamCache.set(cacheKey, { result: fallbackResult, timestamp: now });
+    return fallbackResult;
   }
 
   const prompt = `
@@ -126,7 +174,7 @@ Output strictly structured JSON without markdown formatting:
   "riskLevel": "CRITICAL" | "MODERATE" | "SAFE",
   "elderExplanation": "Simple 1-sentence warning in the specified language",
   "guardianSummary": "Technical breakdown of fraud vectors for the caregiver",
-  "suggestedAction": "BLOCK_AND_REPORT" | "SAFE_TO_OPEN"
+  "suggestedAction": "BLOCK_AND_REPORT" | "SAFE_TO_OPEN" | "MANUAL_REVIEW"
 }
 `;
 
@@ -140,9 +188,22 @@ Output strictly structured JSON without markdown formatting:
     let text = response.text || "{}";
     text = text.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    return JSON.parse(text);
+    const parsed: ScamAnalysisResult = JSON.parse(text);
+
+    // Evict oldest if cache exceeded
+    if (scamCache.size >= MAX_CACHE_ENTRIES) {
+      const oldestKey = scamCache.keys().next().value;
+      if (oldestKey) scamCache.delete(oldestKey);
+    }
+
+    scamCache.set(cacheKey, { result: parsed, timestamp: now });
+    return parsed;
   } catch (error) {
     console.warn("Gemini Scam Analysis Error, falling back to heuristics:", error);
-    return analyzeScamWithHeuristics(content, langCode);
+    const fallback = analyzeScamWithHeuristics(content, langCode);
+    scamCache.set(cacheKey, { result: fallback, timestamp: now });
+    return fallback;
   }
 }
+
+export const analyzeScamMessage = analyzeScam;

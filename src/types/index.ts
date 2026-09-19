@@ -1,148 +1,77 @@
-export type LanguageCode =
-  | "hi-IN"
-  | "en-IN"
-  | "ta-IN"
-  | "te-IN"
-  | "bn-IN"
-  | "mr-IN"
-  | "gu-IN";
-
-export interface LanguageOption {
-  code: LanguageCode;
-  label: string;
-  nativeName: string;
-  greeting: string;
-}
+export type LanguageCode = 'en-IN' | 'hi-IN' | 'ta-IN' | 'te-IN' | 'bn-IN' | 'mr-IN' | 'gu-IN';
+export type ShortLanguageCode = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu';
 
 export interface SeniorUser {
   id: string;
   name: string;
-  age: number;
-  bloodGroup: string;
-  primaryLanguage: LanguageCode;
-  emergencyPhone: string;
-  spendLimitCap: number; // default ₹3000
-  homeAddress: string;
-  homeCoordinates: {
-    lat: number;
-    lng: number;
-  };
+  preferredLanguage: LanguageCode;
+  emergencyContactId: string;
+  safeZoneCenterLat: number;
+  safeZoneCenterLng: number;
+  safeZoneRadiusMeters: number;
 }
 
 export interface Guardian {
   id: string;
   name: string;
-  relationship: string;
   phone: string;
-  email: string;
-  notifyViaWhatsApp: boolean;
-  notifyViaSMS: boolean;
+  seniorId: string;
 }
-
-export type PillTimeSlot = "morning" | "afternoon" | "evening" | "night";
 
 export interface Pill {
   id: string;
   name: string;
-  hindiName?: string;
-  dosage: string;
-  unit: string;
-  timeSlot: PillTimeSlot;
-  scheduledTime: string; // e.g. "08:30 AM"
-  colorHex: string;
-  shape: "capsule" | "round" | "tablet" | "drop";
+  color: string;
+  time: string;
   taken: boolean;
   takenAt?: string;
-  instruction: string;
-  escalatedToGuardian: boolean;
-  isOverdue: boolean;
+  missedAlertSent?: boolean;
 }
-
-export type BillCategory = "electricity" | "water" | "gas" | "phone" | "medical";
 
 export interface Bill {
   id: string;
-  title: string;
-  provider: string;
-  billNumber: string;
-  category: BillCategory;
+  billerName: string;
   amount: number;
   dueDate: string;
-  status: "pending" | "paid" | "flagged";
-  requiresGuardianApproval: boolean;
-  paidAt?: string;
-  transactionRef?: string;
+  isPaid: boolean;
+  isDuplicate: boolean;
 }
 
 export interface FamilyMember {
   id: string;
   name: string;
-  relationship: string;
-  relationHindi: string;
-  avatarUrl: string;
+  relation: string;
+  photoUrl: string;
+  status: 'Available' | 'Busy';
   phone: string;
-  status: "available" | "busy" | "offline";
-  lastContacted?: string;
 }
 
-export type ScamRiskLevel = "CRITICAL" | "MODERATE" | "SAFE";
+export type ScamRiskLevel = 'CRITICAL' | 'MODERATE' | 'SAFE';
 
 export interface ScamAnalysisResult {
   isScam: boolean;
   riskLevel: ScamRiskLevel;
   elderExplanation: string;
   guardianSummary: string;
-  suggestedAction: "BLOCK_AND_REPORT" | "SAFE_TO_OPEN" | "MANUAL_REVIEW";
+  suggestedAction: 'BLOCK_AND_REPORT' | 'SAFE_TO_OPEN' | 'MANUAL_REVIEW';
   detectedTriggers?: string[];
+  fromCache?: boolean;
 }
 
-export interface ScamAlertItem extends ScamAnalysisResult {
+export interface ScamAlert {
   id: string;
-  sender: string;
-  channel: "SMS" | "WhatsApp" | "Call" | "Payment";
-  rawContent: string;
-  receivedAt: string;
-  status: "pending_review" | "approved_safe" | "blocked";
-  reviewedByGuardianAt?: string;
+  content: string;
+  isScam: boolean;
+  riskLevel: ScamRiskLevel;
+  elderExplanation: string;
+  guardianSummary: string;
+  suggestedAction: 'BLOCK_AND_REPORT' | 'SAFE_TO_OPEN' | 'MANUAL_REVIEW';
+  timestamp: string;
+  status: 'PENDING_REVIEW' | 'APPROVED' | 'BLOCKED';
 }
 
 export interface GeofenceZone {
   centerLat: number;
   centerLng: number;
-  radiusKm: number;
-  address: string;
-  label: string;
-}
-
-export interface LocationPing {
-  lat: number;
-  lng: number;
-  timestamp: string;
-  distanceKm: number;
-  isInsideSafeZone: boolean;
-  batteryPercent: number;
-}
-
-export interface DoctorAppointment {
-  id: string;
-  doctorName: string;
-  specialty: string;
-  hospitalName: string;
-  date: string;
-  time: string;
-  status: "confirmed" | "pending" | "completed";
-  address: string;
-  phone: string;
-  tokenNumber: string;
-  syncedToGuardian: boolean;
-}
-
-export interface GuardianNotification {
-  id: string;
-  type: "SOS" | "GEOFENCE_BREACH" | "MISSED_PILL" | "HIGH_BILL" | "SCAM_FLAG";
-  title: string;
-  message: string;
-  timestamp: string;
-  severity: "critical" | "warning" | "info";
-  resolved: boolean;
+  radiusMeters: number;
 }

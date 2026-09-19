@@ -1,4 +1,5 @@
 export type LanguageCode = 'en-IN' | 'hi-IN' | 'ta-IN' | 'te-IN' | 'bn-IN' | 'mr-IN' | 'gu-IN';
+export type ShortLanguageCode = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu';
 
 export interface SeniorUser {
   id: string;
@@ -45,14 +46,26 @@ export interface FamilyMember {
   phone: string;
 }
 
+export type ScamRiskLevel = 'CRITICAL' | 'MODERATE' | 'SAFE';
+
+export interface ScamAnalysisResult {
+  isScam: boolean;
+  riskLevel: ScamRiskLevel;
+  elderExplanation: string;
+  guardianSummary: string;
+  suggestedAction: 'BLOCK_AND_REPORT' | 'SAFE_TO_OPEN' | 'MANUAL_REVIEW';
+  detectedTriggers?: string[];
+  fromCache?: boolean;
+}
+
 export interface ScamAlert {
   id: string;
   content: string;
   isScam: boolean;
-  riskLevel: 'CRITICAL' | 'MODERATE' | 'SAFE';
+  riskLevel: ScamRiskLevel;
   elderExplanation: string;
   guardianSummary: string;
-  suggestedAction: 'BLOCK_AND_REPORT' | 'SAFE_TO_OPEN';
+  suggestedAction: 'BLOCK_AND_REPORT' | 'SAFE_TO_OPEN' | 'MANUAL_REVIEW';
   timestamp: string;
   status: 'PENDING_REVIEW' | 'APPROVED' | 'BLOCKED';
 }
