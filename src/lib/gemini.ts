@@ -153,3 +153,6 @@ Provide your response in strictly valid JSON with no markdown backticks, matchin
     return analyzeScamWithHeuristics(messageContent, seniorLanguage);
   }
 }
+
+export const analyzeScam = analyzeScamMessage;
+
